@@ -19,16 +19,21 @@ public class Chat {
         System.out.print("Porta remota: ");
         int serverPort = reader.nextInt();
         
-        // Para limpar o buffer
         reader.nextLine();
+
+        System.out.print("Deseja usar TCP? (S/N): ");
+        String tcpInput = reader.nextLine().trim().toUpperCase();
+        boolean isTCP = tcpInput.equals("S");
         
         System.out.print("Nome: ");
         String from = reader.nextLine();
         
         try {
-            Sender sender = ChatFactory.build("localhost", serverPort, localPort, new SysOutContainer());
+            Sender sender = ChatFactory.build(isTCP, "localhost", serverPort, localPort, new SysOutContainer());
             String message = "";
             
+            System.out.println("--- Chat " + (isTCP ? "TCP" : "UDP") + " Iniciado ---");
+
             while (!message.equals(KEY_TO_EXIT)) {
                 message = reader.nextLine();
                 

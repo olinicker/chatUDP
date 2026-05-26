@@ -7,6 +7,7 @@ import br.edu.ifsuldeminas.sd.chat.Sender;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
+import javax.swing.border.LineBorder;
 import javax.swing.border.TitledBorder;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -19,6 +20,7 @@ public class ChatGUI extends JFrame implements MessageContainer {
     private JTextField txtIpRemoto;
     private JTextField txtPortaLocal;
     private JTextField txtPortaRemota;
+    private JComboBox<String> cbProtocolo;
     private JButton btnConectar;
 
     private JTextArea areaMensagens;
@@ -28,6 +30,14 @@ public class ChatGUI extends JFrame implements MessageContainer {
     private Sender sender;
     private String nomeUsuario;
 
+    private final Color bgPrincipal = new Color(54, 57, 63);
+    private final Color bgPaineis = new Color(47, 49, 54);
+    private final Color bgInputs = new Color(64, 68, 75);
+    private final Color textoClaro = new Color(220, 221, 222);
+    private final Color corDestaque = new Color(88, 101, 242); // Azul estilo botão
+    private final Font fontePadrao = new Font("Segoe UI", Font.PLAIN, 14);
+    private final Font fonteTitulos = new Font("Segoe UI", Font.BOLD, 12);
+
     public ChatGUI() {
         configurarJanela();
         inicializarComponentes();
@@ -36,12 +46,13 @@ public class ChatGUI extends JFrame implements MessageContainer {
     }
 
     private void configurarJanela() {
-        setTitle("UDP Chat");
-        setSize(600, 500);
-        setMinimumSize(new Dimension(900, 600));
+        setTitle("Trabalho TCP | Linicker - Dyogo");
+        setSize(850, 600);
+        setMinimumSize(new Dimension(800, 600));
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setLocationRelativeTo(null); 
-        
+        setLocationRelativeTo(null);
+        getContentPane().setBackground(bgPrincipal);
+
         try {
             for (UIManager.LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
                 if ("Nimbus".equals(info.getName())) {
@@ -49,7 +60,17 @@ public class ChatGUI extends JFrame implements MessageContainer {
                     break;
                 }
             }
-        } catch (Exception e) {}
+        } catch (Exception ignored) {}
+    }
+
+    private void estilizarCampo(JComponent componente) {
+        componente.setBackground(bgInputs);
+        componente.setForeground(textoClaro);
+        componente.setFont(fontePadrao);
+        componente.setBorder(BorderFactory.createCompoundBorder(
+                new LineBorder(new Color(32, 34, 37), 1, true),
+                new EmptyBorder(5, 8, 5, 8)
+        ));
     }
 
     private void inicializarComponentes() {
@@ -57,50 +78,91 @@ public class ChatGUI extends JFrame implements MessageContainer {
         txtIpRemoto = new JTextField("localhost", 10);
         txtPortaLocal = new JTextField(5);
         txtPortaRemota = new JTextField(5);
-        btnConectar = new JButton("Conectar");
+
+        String[] protocolos = {"UDP", "TCP"};
+        cbProtocolo = new JComboBox<>(protocolos);
+        estilizarCampo(cbProtocolo);
+
+        estilizarCampo(txtNome);
+        estilizarCampo(txtIpRemoto);
+        estilizarCampo(txtPortaLocal);
+        estilizarCampo(txtPortaRemota);
+
+        btnConectar = new JButton("CONECTAR");
+        btnConectar.setBackground(corDestaque);
+        btnConectar.setForeground(Color.WHITE);
+        btnConectar.setFont(new Font("Segoe UI", Font.BOLD, 12));
+        btnConectar.setFocusPainted(false);
+        btnConectar.setCursor(new Cursor(Cursor.HAND_CURSOR));
 
         areaMensagens = new JTextArea();
         areaMensagens.setEditable(false);
         areaMensagens.setLineWrap(true);
         areaMensagens.setWrapStyleWord(true);
-        areaMensagens.setFont(new Font("SansSerif", Font.PLAIN, 14));
-        areaMensagens.setMargin(new Insets(5, 5, 5, 5));
+        areaMensagens.setBackground(bgPaineis);
+        areaMensagens.setForeground(textoClaro);
+        areaMensagens.setFont(fontePadrao);
+        areaMensagens.setBorder(new EmptyBorder(10, 10, 10, 10));
 
         txtMensagem = new JTextField();
-        txtMensagem.setEnabled(false); 
-        btnEnviar = new JButton("Enviar");
+        estilizarCampo(txtMensagem);
+        txtMensagem.setEnabled(false);
+
+        btnEnviar = new JButton("ENVIAR");
+        btnEnviar.setBackground(corDestaque);
+        btnEnviar.setForeground(Color.WHITE);
+        btnEnviar.setFont(new Font("Segoe UI", Font.BOLD, 12));
+        btnEnviar.setFocusPainted(false);
         btnEnviar.setEnabled(false);
+        btnEnviar.setCursor(new Cursor(Cursor.HAND_CURSOR));
     }
 
     private void montarLayout() {
         Container painelPrincipal = getContentPane();
-        painelPrincipal.setLayout(new BorderLayout(10, 10));
-        ((JPanel)painelPrincipal).setBorder(new EmptyBorder(10, 10, 10, 10));
+        painelPrincipal.setLayout(new BorderLayout(15, 15));
+        ((JPanel) painelPrincipal).setBorder(new EmptyBorder(15, 15, 15, 15));
 
-        JPanel painelConfig = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 5));
-        painelConfig.setBorder(BorderFactory.createTitledBorder(
-                BorderFactory.createEtchedBorder(), "Configuração de Rede", TitledBorder.LEFT, TitledBorder.TOP));
+        JPanel painelConfig = new JPanel(new FlowLayout(FlowLayout.LEFT, 12, 10));
+        painelConfig.setBackground(bgPaineis);
+        
+        TitledBorder bordaConfig = BorderFactory.createTitledBorder(
+                new LineBorder(bgInputs, 1, true), " CONFIGURAÇÕES DE REDE ", 
+                TitledBorder.LEFT, TitledBorder.TOP, fonteTitulos, textoClaro);
+        painelConfig.setBorder(BorderFactory.createCompoundBorder(bordaConfig, new EmptyBorder(5, 5, 5, 5)));
 
-        painelConfig.add(new JLabel("Seu Nome:"));
+        adicionarLabelColorida("Nome:", painelConfig);
         painelConfig.add(txtNome);
-        painelConfig.add(new JLabel("Porta Local:"));
+        adicionarLabelColorida("Porta Local:", painelConfig);
         painelConfig.add(txtPortaLocal);
-        painelConfig.add(new JLabel("IP Remoto:"));
+        adicionarLabelColorida("IP Remoto:", painelConfig);
         painelConfig.add(txtIpRemoto);
-        painelConfig.add(new JLabel("Porta Remota:"));
+        adicionarLabelColorida("Porta Remota:", painelConfig);
         painelConfig.add(txtPortaRemota);
+        adicionarLabelColorida("Protocolo:", painelConfig);
+        painelConfig.add(cbProtocolo);
         painelConfig.add(btnConectar);
 
         JScrollPane scrollChat = new JScrollPane(areaMensagens);
-        scrollChat.setBorder(BorderFactory.createTitledBorder("Histórico de Mensagens"));
+        scrollChat.getViewport().setBackground(bgPaineis);
+        scrollChat.setBorder(BorderFactory.createLineBorder(bgInputs, 1));
+        
+        scrollChat.getVerticalScrollBar().setBackground(bgPaineis);
 
         JPanel painelEnvio = new JPanel(new BorderLayout(10, 0));
+        painelEnvio.setBackground(bgPrincipal);
         painelEnvio.add(txtMensagem, BorderLayout.CENTER);
         painelEnvio.add(btnEnviar, BorderLayout.EAST);
 
         painelPrincipal.add(painelConfig, BorderLayout.NORTH);
         painelPrincipal.add(scrollChat, BorderLayout.CENTER);
         painelPrincipal.add(painelEnvio, BorderLayout.SOUTH);
+    }
+
+    private void adicionarLabelColorida(String texto, JPanel painel) {
+        JLabel label = new JLabel(texto);
+        label.setForeground(textoClaro);
+        label.setFont(fonteTitulos);
+        painel.add(label);
     }
 
     private void configurarEventos() {
@@ -123,26 +185,31 @@ public class ChatGUI extends JFrame implements MessageContainer {
             String ipRemoto = txtIpRemoto.getText().trim();
             int portaLocal = Integer.parseInt(txtPortaLocal.getText().trim());
             int portaRemota = Integer.parseInt(txtPortaRemota.getText().trim());
+            boolean isTCP = cbProtocolo.getSelectedItem().equals("TCP");
 
             if (nomeUsuario.isEmpty() || ipRemoto.isEmpty()) {
                 JOptionPane.showMessageDialog(this, "Preencha todos os campos corretamente.", "Aviso", JOptionPane.WARNING_MESSAGE);
                 return;
             }
 
-            sender = ChatFactory.build(ipRemoto, portaRemota, portaLocal, this);
+            sender = ChatFactory.build(isTCP, ipRemoto, portaRemota, portaLocal, this);
 
             txtNome.setEnabled(false);
             txtIpRemoto.setEnabled(false);
             txtPortaLocal.setEnabled(false);
             txtPortaRemota.setEnabled(false);
+            cbProtocolo.setEnabled(false);
+            
             btnConectar.setEnabled(false);
-            btnConectar.setText("Conectado");
+            btnConectar.setText("CONECTADO");
+            btnConectar.setBackground(new Color(59, 165, 93)); // Verde sucesso
 
             txtMensagem.setEnabled(true);
             btnEnviar.setEnabled(true);
             txtMensagem.requestFocus();
 
-            areaMensagens.append("--- Sistema: Chat iniciado em " + ipRemoto + ":" + portaRemota + " ---\n");
+            String descProtocolo = isTCP ? "TCP" : "UDP";
+            areaMensagens.append("🤖 Sistema: Chat (" + descProtocolo + ") iniciado em " + ipRemoto + ":" + portaRemota + "\n\n");
 
         } catch (NumberFormatException ex) {
             JOptionPane.showMessageDialog(this, "As portas devem ser números inteiros válidos.", "Erro de Validação", JOptionPane.ERROR_MESSAGE);
@@ -182,7 +249,7 @@ public class ChatGUI extends JFrame implements MessageContainer {
                 }
                 areaMensagens.setCaretPosition(areaMensagens.getDocument().getLength());
             } catch (Exception e) {
-                areaMensagens.append("--- Erro ao processar mensagem recebida ---\n");
+                areaMensagens.append("⚠️ Erro ao processar mensagem recebida.\n");
             }
         });
     }
