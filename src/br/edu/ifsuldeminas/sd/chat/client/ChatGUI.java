@@ -192,32 +192,44 @@ public class ChatGUI extends JFrame implements MessageContainer {
                 return;
             }
 
-            sender = ChatFactory.build(isTCP, ipRemoto, portaRemota, portaLocal, this);
-
-            txtNome.setEnabled(false);
-            txtIpRemoto.setEnabled(false);
-            txtPortaLocal.setEnabled(false);
-            txtPortaRemota.setEnabled(false);
-            cbProtocolo.setEnabled(false);
-            
             btnConectar.setEnabled(false);
-            btnConectar.setText("CONECTADO");
-            btnConectar.setBackground(new Color(59, 165, 93)); // Verde sucesso
+            btnConectar.setText("AGUARDANDO O OUTRO PC...");
 
-            txtMensagem.setEnabled(true);
-            btnEnviar.setEnabled(true);
-            txtMensagem.requestFocus();
+            new Thread(() -> {
+                try {
+                    sender = ChatFactory.build(isTCP, ipRemoto, portaRemota, portaLocal, this);
 
-            String descProtocolo = isTCP ? "TCP" : "UDP";
-            areaMensagens.append("🤖 Sistema: Chat (" + descProtocolo + ") iniciado em " + ipRemoto + ":" + portaRemota + "\n\n");
+                    SwingUtilities.invokeLater(() -> {
+                        txtNome.setEnabled(false);
+                        txtIpRemoto.setEnabled(false);
+                        txtPortaLocal.setEnabled(false);
+                        txtPortaRemota.setEnabled(false);
+                        cbProtocolo.setEnabled(false);
+                        
+                        btnConectar.setText("CONECTADO");
+                        btnConectar.setBackground(new Color(59, 165, 93)); // Verde sucesso
+
+                        txtMensagem.setEnabled(true);
+                        btnEnviar.setEnabled(true);
+                        txtMensagem.requestFocus();
+
+                        String descProtocolo = isTCP ? "TCP" : "UDP";
+                        areaMensagens.append("🤖 Sistema: Chat (" + descProtocolo + ") iniciado em " + ipRemoto + ":" + portaRemota + "\n\n");
+                    });
+
+                } catch (ChatException ex) {
+                    SwingUtilities.invokeLater(() -> {
+                        btnConectar.setEnabled(true);
+                        btnConectar.setText("CONECTAR");
+                        JOptionPane.showMessageDialog(this, "Erro ao iniciar o chat:\n" + ex.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
+                    });
+                }
+            }).start();
 
         } catch (NumberFormatException ex) {
             JOptionPane.showMessageDialog(this, "As portas devem ser números inteiros válidos.", "Erro de Validação", JOptionPane.ERROR_MESSAGE);
-        } catch (ChatException ex) {
-            JOptionPane.showMessageDialog(this, "Erro ao iniciar o chat:\n" + ex.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
         }
     }
-
     private void enviarMensagem() {
         String texto = txtMensagem.getText().trim();
         if (texto.isEmpty() || sender == null) return;
