@@ -30,14 +30,16 @@ public class ChatGUI extends JFrame implements MessageContainer {
     private Sender sender;
     private String nomeUsuario;
 
-    private final Color bgPrincipal = new Color(54, 57, 63);
-    private final Color bgPaineis = new Color(47, 49, 54);
-    private final Color bgInputs = new Color(64, 68, 75);
-    private final Color textoClaro = new Color(220, 221, 222);
-    private final Color corDestaque = new Color(88, 101, 242); // Azul estilo botão
-    private final Font fontePadrao = new Font("Segoe UI", Font.PLAIN, 14);
-    private final Font fonteTitulos = new Font("Segoe UI", Font.BOLD, 12);
+    private final Color bgPrincipal = new Color(139, 139, 139);
+    private final Color bgPaineis = new Color(198, 198, 198); 
+    private final Color bgInputs = new Color(0, 0, 0, 150);
+    private final Color textoClaro = new Color(255, 255, 255);
+    private final Color textoAmarelo = new Color(255, 255, 85);
+    private final Color corDestaque = new Color(85, 255, 85);
 
+    private final Font fontePadrao = new Font("Monospaced", Font.PLAIN, 14);
+    private final Font fonteTitulos = new Font("Monospaced", Font.BOLD, 12);
+    
     public ChatGUI() {
         configurarJanela();
         inicializarComponentes();
@@ -46,8 +48,8 @@ public class ChatGUI extends JFrame implements MessageContainer {
     }
 
     private void configurarJanela() {
-        setTitle("Trabalho TCP | Linicker - Dyogo");
-        setSize(850, 600);
+        setTitle("Minecraft Chat TCP/UDP | Linicker - Dyogo");
+        setSize(1050, 600);
         setMinimumSize(new Dimension(800, 600));
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
@@ -63,12 +65,30 @@ public class ChatGUI extends JFrame implements MessageContainer {
         } catch (Exception ignored) {}
     }
 
+    private void tocarSom(String caminhoArquivo) {
+        try {
+            java.io.File arquivoSom = new java.io.File(caminhoArquivo);
+            
+            if(arquivoSom.exists()) {
+                javax.sound.sampled.AudioInputStream audioIn = javax.sound.sampled.AudioSystem.getAudioInputStream(arquivoSom);
+                javax.sound.sampled.Clip clip = javax.sound.sampled.AudioSystem.getClip();
+                clip.open(audioIn);
+                clip.start();
+            } else {
+            }
+            
+        } catch (javax.sound.sampled.UnsupportedAudioFileException e) {
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+    
     private void estilizarCampo(JComponent componente) {
         componente.setBackground(bgInputs);
         componente.setForeground(textoClaro);
         componente.setFont(fontePadrao);
         componente.setBorder(BorderFactory.createCompoundBorder(
-                new LineBorder(new Color(32, 34, 37), 1, true),
+                new LineBorder(Color.BLACK, 2, false),
                 new EmptyBorder(5, 8, 5, 8)
         ));
     }
@@ -88,18 +108,28 @@ public class ChatGUI extends JFrame implements MessageContainer {
         estilizarCampo(txtPortaLocal);
         estilizarCampo(txtPortaRemota);
 
-        btnConectar = new JButton("CONECTAR");
-        btnConectar.setBackground(corDestaque);
-        btnConectar.setForeground(Color.WHITE);
-        btnConectar.setFont(new Font("Segoe UI", Font.BOLD, 12));
+        btnConectar = new JButton("CONECTAR") {
+            @Override
+            protected void paintComponent(Graphics g) {
+                try {
+                    Image fundo = new ImageIcon("grass.png").getImage();
+                    g.drawImage(fundo, 0, 0, getWidth(), getHeight(), this);
+                } catch (Exception e) {}
+                super.paintComponent(g);
+            }
+        };
+        btnConectar.setContentAreaFilled(false);
+        btnConectar.setForeground(Color.BLACK);
+        btnConectar.setFont(new Font("Monospaced", Font.BOLD, 14));
         btnConectar.setFocusPainted(false);
+        btnConectar.setBorder(new LineBorder(Color.BLACK, 2, false));
         btnConectar.setCursor(new Cursor(Cursor.HAND_CURSOR));
 
         areaMensagens = new JTextArea();
         areaMensagens.setEditable(false);
         areaMensagens.setLineWrap(true);
         areaMensagens.setWrapStyleWord(true);
-        areaMensagens.setBackground(bgPaineis);
+        areaMensagens.setBackground(bgInputs);
         areaMensagens.setForeground(textoClaro);
         areaMensagens.setFont(fontePadrao);
         areaMensagens.setBorder(new EmptyBorder(10, 10, 10, 10));
@@ -108,26 +138,46 @@ public class ChatGUI extends JFrame implements MessageContainer {
         estilizarCampo(txtMensagem);
         txtMensagem.setEnabled(false);
 
-        btnEnviar = new JButton("ENVIAR");
-        btnEnviar.setBackground(corDestaque);
-        btnEnviar.setForeground(Color.WHITE);
-        btnEnviar.setFont(new Font("Segoe UI", Font.BOLD, 12));
+        btnEnviar = new JButton("ENVIAR") {
+            @Override
+            protected void paintComponent(Graphics g) {
+                try {
+                    Image fundo = new ImageIcon("grass.png").getImage();
+                    g.drawImage(fundo, 0, 0, getWidth(), getHeight(), this);
+                } catch (Exception e) {}
+                super.paintComponent(g);
+            }
+        };
+        btnEnviar.setContentAreaFilled(false);
+        btnEnviar.setForeground(Color.BLACK);
+        btnEnviar.setFont(new Font("Monospaced", Font.BOLD, 14));
         btnEnviar.setFocusPainted(false);
+        btnEnviar.setBorder(new LineBorder(Color.BLACK, 2, false));
         btnEnviar.setEnabled(false);
         btnEnviar.setCursor(new Cursor(Cursor.HAND_CURSOR));
     }
 
     private void montarLayout() {
-        Container painelPrincipal = getContentPane();
-        painelPrincipal.setLayout(new BorderLayout(15, 15));
-        ((JPanel) painelPrincipal).setBorder(new EmptyBorder(15, 15, 15, 15));
+        JPanel painelPrincipal = new JPanel(new BorderLayout(15, 15)) {
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                try {
+                    Image fundo = new ImageIcon("dirt.png").getImage();
+                    g.drawImage(fundo, 0, 0, getWidth(), getHeight(), this);
+                } catch (Exception e) {}
+            }
+        };
+        painelPrincipal.setBackground(bgPrincipal);
+        painelPrincipal.setBorder(new EmptyBorder(15, 15, 15, 15));
+        setContentPane(painelPrincipal);
 
         JPanel painelConfig = new JPanel(new FlowLayout(FlowLayout.LEFT, 12, 10));
         painelConfig.setBackground(bgPaineis);
         
         TitledBorder bordaConfig = BorderFactory.createTitledBorder(
-                new LineBorder(bgInputs, 1, true), " CONFIGURAÇÕES DE REDE ", 
-                TitledBorder.LEFT, TitledBorder.TOP, fonteTitulos, textoClaro);
+                new LineBorder(Color.BLACK, 2, false), " INVENTÁRIO DE REDE ", 
+                TitledBorder.LEFT, TitledBorder.TOP, fonteTitulos, Color.BLACK);
         painelConfig.setBorder(BorderFactory.createCompoundBorder(bordaConfig, new EmptyBorder(5, 5, 5, 5)));
 
         adicionarLabelColorida("Nome:", painelConfig);
@@ -144,12 +194,12 @@ public class ChatGUI extends JFrame implements MessageContainer {
 
         JScrollPane scrollChat = new JScrollPane(areaMensagens);
         scrollChat.getViewport().setBackground(bgPaineis);
-        scrollChat.setBorder(BorderFactory.createLineBorder(bgInputs, 1));
+        scrollChat.setBorder(new LineBorder(Color.BLACK, 2, false));
         
         scrollChat.getVerticalScrollBar().setBackground(bgPaineis);
 
         JPanel painelEnvio = new JPanel(new BorderLayout(10, 0));
-        painelEnvio.setBackground(bgPrincipal);
+        painelEnvio.setOpaque(false);
         painelEnvio.add(txtMensagem, BorderLayout.CENTER);
         painelEnvio.add(btnEnviar, BorderLayout.EAST);
 
@@ -160,7 +210,7 @@ public class ChatGUI extends JFrame implements MessageContainer {
 
     private void adicionarLabelColorida(String texto, JPanel painel) {
         JLabel label = new JLabel(texto);
-        label.setForeground(textoClaro);
+        label.setForeground(Color.BLACK);
         label.setFont(fonteTitulos);
         painel.add(label);
     }
@@ -193,7 +243,7 @@ public class ChatGUI extends JFrame implements MessageContainer {
             }
 
             btnConectar.setEnabled(false);
-            btnConectar.setText("AGUARDANDO O OUTRO PC...");
+            btnConectar.setText("CONECTANDO...");
 
             new Thread(() -> {
                 try {
@@ -207,14 +257,15 @@ public class ChatGUI extends JFrame implements MessageContainer {
                         cbProtocolo.setEnabled(false);
                         
                         btnConectar.setText("CONECTADO");
-                        btnConectar.setBackground(new Color(59, 165, 93)); // Verde sucesso
 
                         txtMensagem.setEnabled(true);
                         btnEnviar.setEnabled(true);
                         txtMensagem.requestFocus();
 
                         String descProtocolo = isTCP ? "TCP" : "UDP";
-                        areaMensagens.append("🤖 Sistema: Chat (" + descProtocolo + ") iniciado em " + ipRemoto + ":" + portaRemota + "\n\n");
+                        areaMensagens.append("🤖 Server: Chat (" + descProtocolo + ") iniciado em " + ipRemoto + ":" + portaRemota + "\n\n");
+                        
+                        tocarSom("xp.wav");
                     });
 
                 } catch (ChatException ex) {
@@ -230,6 +281,7 @@ public class ChatGUI extends JFrame implements MessageContainer {
             JOptionPane.showMessageDialog(this, "As portas devem ser números inteiros válidos.", "Erro de Validação", JOptionPane.ERROR_MESSAGE);
         }
     }
+    
     private void enviarMensagem() {
         String texto = txtMensagem.getText().trim();
         if (texto.isEmpty() || sender == null) return;
@@ -237,8 +289,10 @@ public class ChatGUI extends JFrame implements MessageContainer {
         try {
             String mensagemFormatada = String.format("%s%s%s", texto, MessageContainer.FROM, nomeUsuario);
             sender.send(mensagemFormatada);
-            areaMensagens.append("Você: " + texto + "\n");
+            areaMensagens.append("<" + nomeUsuario + "> " + texto + "\n");
             txtMensagem.setText("");
+            
+            tocarSom("pop.wav");
             
         } catch (ChatException ex) {
             JOptionPane.showMessageDialog(this, "Falha ao enviar: " + ex.getMessage(), "Erro de Envio", JOptionPane.ERROR_MESSAGE);
@@ -255,7 +309,10 @@ public class ChatGUI extends JFrame implements MessageContainer {
                 if (partes.length >= 2) {
                     String conteudo = partes[0];
                     String remetente = partes[1];
-                    areaMensagens.append(remetente + ": " + conteudo + "\n");
+                    areaMensagens.append("<" + remetente + "> " + conteudo + "\n");
+                    
+                    tocarSom("villager.wav");
+                    
                 } else {
                     areaMensagens.append("Desconhecido: " + message + "\n");
                 }
